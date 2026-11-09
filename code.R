@@ -1854,32 +1854,6 @@ Figure_3 <- ggplot(
     alpha = 0.95
   ) +
   
-  # Moderator annotation.
-  
-  annotate(
-    geom = "label",
-    x = posicao_moderador_x,
-    y = Inf,
-    label = "Moderator:\nAverage taxonomic distinctness",
-    hjust = 0.5,
-    vjust = 1.15,
-    family = "serif",
-    fontface = "bold",
-    size = 5.2,
-    lineheight = 1.05,
-    color = "grey20",
-    fill = scales::alpha("white", 0.92),
-    linewidth = 0.35,
-    label.padding = grid::unit(
-      0.35,
-      "lines"
-    ),
-    label.r = grid::unit(
-      0.12,
-      "lines"
-    )
-  ) +
-  
   # Log10 distance axis.
   
   scale_x_log10(
@@ -1888,12 +1862,12 @@ Figure_3 <- ggplot(
     )
   ) +
   
-  # Colors.
+  # Moderator colors.
   
   scale_color_manual(
     values = cores_interacao,
     breaks = names(cores_interacao),
-    name = "Moderator level",
+    name = "Average taxonomic distinctness",
     drop = FALSE
   ) +
   
@@ -1911,7 +1885,9 @@ Figure_3 <- ggplot(
   
   guides(
     color = guide_legend(
-      nrow = 1,
+      title.position = "top",
+      title.hjust = 0.5,
+      ncol = 1,
       byrow = TRUE,
       override.aes = list(
         linewidth = 2,
@@ -1960,13 +1936,25 @@ Figure_3 <- ggplot(
       linewidth = 0.7
     ),
     
-    legend.position = "bottom",
-    legend.direction = "horizontal",
+    legend.position = "inside",
+    
+    legend.position.inside = c(
+      0.97,
+      0.97
+    ),
+    
+    legend.justification = c(
+      1,
+      1
+    ),
+    
+    legend.direction = "vertical",
     
     legend.title = element_text(
       family = "serif",
       face = "bold",
-      size = 18
+      size = 18,
+      hjust = 0.5
     ),
     
     legend.text = element_text(
@@ -1975,7 +1963,7 @@ Figure_3 <- ggplot(
     ),
     
     legend.key.width = grid::unit(
-      1.8,
+      1.5,
       "cm"
     ),
     
@@ -1984,13 +1972,25 @@ Figure_3 <- ggplot(
       "cm"
     ),
     
-    legend.spacing.x = grid::unit(
-      0.3,
+    legend.spacing.y = grid::unit(
+      0.15,
       "cm"
     ),
     
+    legend.background = element_rect(
+      fill = scales::alpha(
+        "white",
+        0.90
+      ),
+      color = "grey70",
+      linewidth = 0.35
+    ),
+    
     legend.margin = margin(
-      t = 10
+      8,
+      10,
+      8,
+      10
     ),
     
     plot.margin = margin(
@@ -3653,8 +3653,7 @@ niveis_moderadores_fig5 <- bind_rows(
 
 niveis_moderadores_fig5
 
-
-# Colors and line types ---------------------------------------------------
+# Colors and line types ---------------------------------
 
 cores_interacao_fig5 <- c(
   "Low (−1 SD)" = "#BFA9D4",
@@ -3669,23 +3668,14 @@ tipos_linha_fig5 <- c(
 )
 
 
-# Plot function -----------------------------------------------------------
+# Plot function -----------------------------------------
 
 criar_plot_interacao_volume <- function(
     dados,
     nome_moderador,
     eixo_y,
-    percentual = TRUE) {
-  
-  intervalo_log_x <- range(
-    log10(dados$Volume),
-    na.rm = TRUE
-  )
-  
-  posicao_moderador_x <- 10^(
-    intervalo_log_x[1] +
-      0.72 * diff(intervalo_log_x)
-  )
+    percentual = TRUE,
+    mostrar_legenda = FALSE) {
   
   grafico <- ggplot(
     dados,
@@ -3711,43 +3701,14 @@ criar_plot_interacao_volume <- function(
       alpha = 0.14
     ) +
     
-    # Predicted amphibious proportions.
+    # Model predictions.
     
     geom_line(
       linewidth = 1.6,
       alpha = 0.95
     ) +
     
-    # Moderator annotation.
-    
-    annotate(
-      geom = "label",
-      x = posicao_moderador_x,
-      y = Inf,
-      label = paste0(
-        "Moderator:\n",
-        nome_moderador
-      ),
-      hjust = 0.5,
-      vjust = 1.15,
-      family = "serif",
-      fontface = "bold",
-      size = 5,
-      lineheight = 1.05,
-      color = "grey20",
-      fill = scales::alpha("white", 0.92),
-      linewidth = 0.35,
-      label.padding = grid::unit(
-        0.32,
-        "lines"
-      ),
-      label.r = grid::unit(
-        0.12,
-        "lines"
-      )
-    ) +
-    
-    # Log10 pool volume axis.
+    # Log10 pool-volume axis.
     
     scale_x_log10(
       labels = scales::label_number(
@@ -3755,12 +3716,12 @@ criar_plot_interacao_volume <- function(
       )
     ) +
     
-    # Color scale.
+    # Colors and line types.
     
     scale_color_manual(
       values = cores_interacao_fig5,
       breaks = names(cores_interacao_fig5),
-      name = "Moderator level",
+      name = nome_moderador,
       drop = FALSE
     ) +
     
@@ -3778,11 +3739,15 @@ criar_plot_interacao_volume <- function(
     
     guides(
       color = guide_legend(
-        nrow = 1,
+        title.position = "top",
+        title.hjust = 0.5,
+        ncol = 1,
         byrow = TRUE,
         override.aes = list(
           linewidth = 2,
-          linetype = unname(tipos_linha_fig5),
+          linetype = unname(
+            tipos_linha_fig5
+          ),
           alpha = 1
         )
       )
@@ -3829,16 +3794,7 @@ criar_plot_interacao_volume <- function(
         linewidth = 0.7
       ),
       
-      legend.title = element_text(
-        family = "serif",
-        face = "bold",
-        size = 17
-      ),
-      
-      legend.text = element_text(
-        family = "serif",
-        size = 16
-      ),
+      legend.position = "none",
       
       plot.margin = margin(
         20,
@@ -3847,6 +3803,71 @@ criar_plot_interacao_volume <- function(
         15
       )
     )
+  
+  # Internal legend only in the selected panel.
+  
+  if (mostrar_legenda) {
+    grafico <- grafico +
+      theme(
+        legend.position = "inside",
+        
+        legend.position.inside = c(
+          0.97,
+          0.97
+        ),
+        
+        legend.justification = c(
+          1,
+          1
+        ),
+        
+        legend.direction = "vertical",
+        
+        legend.title = element_text(
+          family = "serif",
+          face = "bold",
+          size = 16,
+          hjust = 0.5,
+          lineheight = 1.05
+        ),
+        
+        legend.text = element_text(
+          family = "serif",
+          size = 15
+        ),
+        
+        legend.key.width = grid::unit(
+          1.35,
+          "cm"
+        ),
+        
+        legend.key.height = grid::unit(
+          0.60,
+          "cm"
+        ),
+        
+        legend.spacing.y = grid::unit(
+          0.10,
+          "cm"
+        ),
+        
+        legend.background = element_rect(
+          fill = scales::alpha(
+            "white",
+            0.90
+          ),
+          color = "grey70",
+          linewidth = 0.35
+        ),
+        
+        legend.margin = margin(
+          7,
+          9,
+          7,
+          9
+        )
+      )
+  }
   
   if (percentual) {
     grafico <- grafico +
@@ -3867,7 +3888,7 @@ criar_plot_interacao_volume <- function(
 }
 
 
-# Common panel tag theme --------------------------------------------------
+# Common panel-tag theme -------------------------------
 
 tema_tags_fig5 <- theme(
   plot.tag = element_text(
@@ -3890,82 +3911,61 @@ tema_tags_fig5 <- theme(
   )
 )
 
-
-# Figure 5A ---------------------------------------------------------------
+# Figure 5A --------------------------------------------
 
 fig5_A <- criar_plot_interacao_volume(
   dados = predicao_fig5_A,
-  nome_moderador = "Average taxonomic\ndistinctness",
+  nome_moderador = paste0(
+    "Average taxonomic\n",
+    "distinctness"
+  ),
   eixo_y = "Estimated amphibious richness (%)",
-  percentual = TRUE
+  percentual = TRUE,
+  mostrar_legenda = TRUE
 ) +
-  labs(tag = "A") +
+  labs(
+    tag = "A"
+  ) +
   tema_tags_fig5
 
 fig5_A
 
 
-# Figure 5B ---------------------------------------------------------------
+# Figure 5B --------------------------------------------
 
 fig5_B <- criar_plot_interacao_volume(
   dados = predicao_fig5_B,
-  nome_moderador = "Average taxonomic\ndistinctness",
+  nome_moderador = paste0(
+    "Average taxonomic\n",
+    "distinctness"
+  ),
   eixo_y = "Estimated amphibious abundance (%)",
-  percentual = TRUE
+  percentual = TRUE,
+  mostrar_legenda = TRUE
 ) +
-  labs(tag = "B") +
+  labs(
+    tag = "B"
+  ) +
   tema_tags_fig5
 
 fig5_B
 
 
-# Complete Figure 5 -------------------------------------------------------
+# Complete Figure 5 ------------------------------------
 
 Figure_5 <- (
-  fig5_A | fig5_B
+  fig5_A |
+    fig5_B
 ) +
   patchwork::plot_layout(
     ncol = 2,
-    widths = c(1, 1),
-    guides = "collect"
-  ) &
-  theme(
-    legend.position = "bottom",
-    legend.direction = "horizontal",
-    
-    legend.key.width = grid::unit(
-      1.8,
-      "cm"
-    ),
-    
-    legend.key.height = grid::unit(
-      0.65,
-      "cm"
-    ),
-    
-    legend.spacing.x = grid::unit(
-      0.3,
-      "cm"
-    ),
-    
-    legend.text = element_text(
-      family = "serif",
-      size = 16
-    ),
-    
-    legend.title = element_text(
-      family = "serif",
-      face = "bold",
-      size = 17
-    ),
-    
-    legend.margin = margin(
-      t = 12
+    widths = c(
+      1,
+      1
     )
   )
 
 Figure_5
-
 
 # Save --------------------------------------------------------------------
 
